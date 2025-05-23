@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FRIDAY</title>
+  <link rel="shortcut icon" href="assets/image/logo.ico" type="image/x-icon" />
+  <script src="/eel.js"></script>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+
+<body>
+  <div id="menuButton" style="position: absolute; top: 20px; left: 20px; z-index: 10; cursor: pointer;">
+    <svg width="24" height="24" fill="none" stroke="#ececec" stroke-width="2" stroke-linecap="round"
+      stroke-linejoin="round" viewBox="0 0 24 24">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </div>
+
+  <div class="sidebar hidden">
+    <div style="display: flex; justify-content: flex-end; padding: 0 16px;">
+      <i class="fa-solid fa-plus disabled" id="newChatBtn" style="font-size: 1.5rem; cursor: not-allowed; opacity: 0.5;"></i>
+    </div>
+    <h2 style="margin-top: 1cm;">Chats</h2>
+    <div class="chat-list" id="chatHistoryList"></div>
+    <div class="bottom">
+      <a href="index.html"><img src="assets/image/logo.ico" alt="User" /></a>
+      <a href="index.html" style="text-decoration: none; color: inherit;">FRIDAY</a>
+    </div>
+  </div>
+
+  <div class="main-chat">
+    <h2 class="chat-header" id="chatTitle">How may I help you?</h2>
+    <div class="chat-messages" id="chatMessages"></div>
+    <div class="chat-input-bar">
+      <div class="chat-input-inner">
+        <input type="text" id="userInput" placeholder="Ask anything..." autocomplete="off" />
+        <button id="sendButton" title="Send">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round" viewBox="0 0 24 24">
+            <path d="M22 2L11 13"></path>
+            <path d="M22 2L15 22L11 13L2 9L22 2Z"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const menuButton = document.getElementById('menuButton');
+    const sidebar = document.querySelector('.sidebar');
+    const chatMessages = document.getElementById('chatMessages');
+    const input = document.getElementById('userInput');
+    const sendButton = document.getElementById('sendButton');
+    const chatHistoryList = document.getElementById('chatHistoryList');
+    const chatTitle = document.getElementById('chatTitle');
+    const newChatBtn = document.getElementById('newChatBtn');
+
+    let chats = {};
+    let currentChatId = null;
+
+    menuButton.addEventListener('click', () => {
+      sidebar.classList.toggle('hidden');
+    });
+
+    function loadChats() {
+      const saved = localStorage.getItem('chatHistory');
+      if (saved) {
+        chats = JSON.parse(saved);
+      }
+    }
+
+    function saveChats() {
+      localStorage.setItem('chatHistory', JSON.stringify(chats));
+    }
+
+    function generateChatId() {
+      return `chat-${Date.now()}`;
+    }
+
+    function appendMessage(text, sender) {
+      const messageRow = document.createElement('div');
+      messageRow.className = 'message-row';
+      const messageEl = document.createElement('div');
+      messageEl.className = `message ${sender}`;
+      messageEl.textContent = text;
+      messageRow.appendChild(messageEl);
+      chatMessages.appendChild(messageRow);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function renderChatList() {
+      chatHistoryList.innerHTML = '';
+      // Convert chats object to array and reverse to show newest first
+      Object.entries(chats)
+        .sort((a, b) => parseInt(b[0].split('-')[1]) - parseInt(a[0].split('-')[1]))
+        .forEach(([chatId, messages]) => {
+          const chatContainer = document.createElement('div');
+          chatContainer.className = 'chat-item-container';
+          
+          const chatEl = document.createElement('div');
+          chatEl.className = 'chat-item';
+          chatEl.textContent = messages[0]?.text?.slice(0, 30) || 'New Chat';
+          chatEl.onclick = () => {
+            currentChatId = chatId;
+            loadMessages(chatId);
+          };
+          
+          const menuBtn = document.createElement('div');
+          menuBtn.className = 'menu-btn';
+          menuBtn.innerHTML = '<i class="fas fa-ellipsis-v"></i>';
+          
+          const deleteBtn = document.createElement('div');
+          deleteBtn.className = 'delete-btn hidden';
+          deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
+          
+          menuBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            menuBtn.classList.add('hidden');
+            deleteBtn.classList.remove('hidden');
+          });
+          
+          deleteBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            delete chats[chatId];
+            saveChats();
+            if (currentChatId === chatId) startNewChat();
+            renderChatList();
+          });
+          
+          chatContainer.appendChild(chatEl);
+          chatContainer.appendChild(menuBtn);
+          chatContainer.appendChild(deleteBtn);
+          chatHistoryList.appendChild(chatContainer);
+        });
+    }
+
+    function loadMessages(chatId) {
+      chatMessages.innerHTML = '';
+      chats[chatId]?.forEach(({ sender, text }) => appendMessage(text, sender));
+    }
+
+    function startNewChat() {
+      const newId = generateChatId();
+      chats[newId] = [];
+      currentChatId = newId;
+      chatMessages.innerHTML = '';
+      chatTitle.textContent = "How may I help you?";
+      saveChats();
+      renderChatList();
+    }
+
+    function enableNewChatIfMessageSent() {
+      newChatBtn.classList.remove('disabled');
+      newChatBtn.style.pointerEvents = 'auto';
+      newChatBtn.style.opacity = '1';
+      newChatBtn.style.cursor = 'pointer';
+    }
+
+    newChatBtn.addEventListener('click', () => {
+      if (!newChatBtn.classList.contains('disabled')) {
+        startNewChat();
+      }
+    });
+
+    async function sendMessage() {
+      const message = input.value.trim();
+      if (!message) return;
+
+      appendMessage(message, 'user');
+      input.value = '';
+      input.focus();
+
+      if (!chats[currentChatId]) chats[currentChatId] = [];
+      chats[currentChatId].push({ sender: 'user', text: message });
+      saveChats();
+      enableNewChatIfMessageSent();
+
+      const thinkingRow = document.createElement('div');
+      thinkingRow.className = 'message-row';
+      const thinkingEl = document.createElement('div');
+      thinkingEl.className = 'message bot';
+      thinkingEl.textContent = 'Thinking...';
+      thinkingRow.appendChild(thinkingEl);
+      chatMessages.appendChild(thinkingRow);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+
+      try {
+        const response = await eel.chat_with_llama(message)();
+        chatMessages.removeChild(thinkingRow);
+        appendMessage(response, 'bot');
+        chats[currentChatId].push({ sender: 'bot', text: response });
+        saveChats();
+        renderChatList();
+      } catch (error) {
+        chatMessages.removeChild(thinkingRow);
+        appendMessage('Error occurred. Please try again.', 'bot');
+        console.error('Error:', error);
+      }
+    }
+
+    sendButton.addEventListener('click', sendMessage);
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') sendMessage();
+    });
+
+    window.onload = () => {
+      loadChats();
+      const ids = Object.keys(chats);
+      if (ids.length > 0) {
+        currentChatId = ids[0];
+        loadMessages(currentChatId);
+        enableNewChatIfMessageSent();
+      } else {
+        startNewChat();
+      }
+      renderChatList();
+    };
+  </script>
+</body>
+</html>

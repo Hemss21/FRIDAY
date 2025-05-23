@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FRIDAY</title>
+
+    <link rel="shortcut icon" href="assets/image/logo.ico" type="image/x-icon">
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        crossorigin="anonymous" />
+
+    <!-- Bootstrap icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+
+    <!-- Particle.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js"
+        type="text/javascript"></script>
+
+    <!-- Texllate -->
+    <link rel="stylesheet" href="assets/vendore/texllate/animate.css" />
+
+    <!-- Animate.css -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+
+    <link rel="stylesheet" href="style.css" />
+
+
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #000;
+            margin: 0;
+            overflow-y: auto; /* Enable vertical scrolling */
+        }
+
+        /* Custom scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1a1a1a;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #444;
+        }
+
+        .container {
+            max-height: 90vh; /* Set maximum height */
+            overflow-y: auto; /* Enable container scrolling */
+            padding: 20px;
+        }
+    </style>
+    <style>
+        .Siri-message {
+            font-size: 24px;
+            text-align: center;
+            margin-top: 50px;
+            padding: 10px 20px;
+            color: white;
+            border-radius: 10px;
+            display: inline-block;
+            animation: Siri-message 4s ease-in-out infinite;
+            animation-delay: 2s;
+        }
+    </style>
+
+    <body style="background-color: black;">
+    <section id="SiriWave" class="mb-4">
+
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="d-flex justify-content-center align-items-center"
+                        style="min-height: 100%; height: auto;">
+                        <div class="">
+                            <h3 id="Siri-message" class="Siri-message text-start text-light mb-3">This is F.R.I.D.A.Y</h3>
+                            <div id="siri-container"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </section>
+
+    <!-- Siri Wave -->
+    <script src="https://cdn.jsdelivr.net/gh/kopiro/siriwave/dist/siriwave.umd.js"></script>
+    <script src="ios9-curve.js"></script>
+    <script src="/eel.js"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const siriWave = new SiriWave({
+                container: document.getElementById("siri-container"),
+                width: 640,
+                height: 200,
+                style: 'ios9',
+                amplitude: 1,
+                speed: 0.05,
+                autostart: true
+            });
+
+            const ios9Curve = new iOS9Curve(siriWave, {
+                color: "15, 82, 169",
+                supportLine: true
+            });
+
+            function animate() {
+                ios9Curve.draw();
+                requestAnimationFrame(animate);
+            }
+
+            animate();
+
+
+        });
+    </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            function startListening() {
+                eel.allCommands().then((response) => {
+                    if (response === "exit") {
+                        window.location.href = 'index.html';
+                    } else {
+                        // Continue listening after command completes
+                        setTimeout(startListening, 1000);
+                    }
+                });
+            }
+            startListening();
+        })
+
+        eel.expose(DisplayMessage);
+        function DisplayMessage (message) {
+            document.getElementById("Siri-message").textContent = message;
+        }
+    </script>
+    <script type="text/javascript">
+        eel.expose(redirectToMain);
+        function redirectToMain() {
+            console.log("Redirecting to main page...");
+            window.location.href = 'index.html';
+        }
+    </script>
+    <!-- texllate js -->
+    <script src="assets/vendore/texllate/jquery.fittext.js"></script>
+    <script src="assets/vendore/texllate/jquery.lettering.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/textillate/0.4.0/jquery.textillate.min.js"></script>
+
+    <!-- jQuery (Load first since others depend on it) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+
+    <!-- jQuery UI -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
+
+    <!-- Lettering.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lettering.js/0.7.0/jquery.lettering.min.js"></script>
+
+    <!-- FitText.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FitText.js/1.2.0/jquery.fittext.min.js"></script>
+
+    <!-- Textillate.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/textillate/0.4.0/jquery.textillate.min.js"></script>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        crossorigin="anonymous"></script>
+
+    <!-- Custom Scripts -->
+    <script src="script.js"></script>
+    <script src="main.js"></script>
+    <script src="controller.js"></script>
+    
+
+</body>
+
+</html>

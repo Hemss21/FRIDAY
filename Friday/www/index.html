@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FRIDAY</title>
+    <link rel="shortcut icon" href="assets/image/logo.ico" type="image/x-icon">
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        crossorigin="anonymous" />
+
+    <!-- Bootstrap icons-->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <!-- Particle js-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js"
+        type="text/javascript"></script>
+
+    <!-- Texllate -->
+    <link rel="stylesheet" href="assets/vendore/texllate/animate.css">
+
+    <link rel="stylesheet" href="style.css" />
+    <style>
+        #TextInput {
+            background-color: #343541;  /* Changed from #181818a8 to #343541 */
+            border: none;
+            box-shadow: none;
+            font-family: 'Inter', sans-serif;
+            border-radius: 25px;
+            color: white;
+            padding: 5px 15px;
+            margin: 0 auto;
+            width: 60%;
+            max-width: 800px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .input-field {
+            background-color: transparent;
+            border: none;
+            width: 100%;
+            outline: none;
+            color: white;  /* Changed from rgb(0, 225, 255) to white */
+            font-family: 'Inter', sans-serif;
+        }
+
+        .button-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-left: 10px;
+        }
+
+        .glow-on-hover {
+            width: 35px;
+            height: 35px;
+            border: none;
+            outline: none;
+            color: #fff;
+            background: none;
+            cursor: pointer;
+            padding: 0;
+            transition: transform 0.2s ease;
+        }
+
+        .glow-on-hover i {
+            font-size: 20px;
+        }
+
+        .glow-on-hover:hover {
+            transform: scale(1.1);
+            color: black;  /* Light blue color on hover */
+        }
+        .glow-on-hover:before,
+        .glow-on-hover:after {
+            display: none;
+        }
+
+        .glow-on-hover:hover {
+            color: #ccc;  /* Subtle hover effect */
+        }
+        .glow-on-hover:after {
+            background: transparent;  /* Changed from #111 to transparent */
+        }
+
+        /* Increase icon size for better visibility */
+        .glow-on-hover i {
+            font-size: 20px;
+        }
+
+        .glow-on-hover:before {
+            content: '';
+            background: linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00,
+                    #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000);
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            background-size: 400%;
+            z-index: -1;
+            filter: blur(5px);
+            width: calc(100% + 4px);
+            height: calc(100% + 4px);
+            animation: glowing 20s linear infinite;
+            opacity: 0;
+            transition: opacity .3s ease-in-out;
+            border-radius: 10px;
+        }
+
+        .glow-on-hover:active {
+            color: #181818a8;
+        }
+
+        .glow-on-hover:active:after {
+            background: transparent;
+        }
+
+        .glow-on-hover:hover:before {
+            opacity: 1;
+        }
+
+        .glow-on-hover:after {
+            z-index: -1;
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: #111;
+            left: 0;
+            top: 0;
+            border-radius: 10px;
+        }
+
+        @keyframes glowing {
+            0% {
+                background-position: 0 0;
+            }
+
+            50% {
+                background-position: 400% 0;
+            }
+
+            100% {
+                background-position: 0 0;
+            }
+        }
+        ::placeholder {
+            color: rgba(255, 255, 255, 0.7);  /* Added placeholder color */
+        }
+    </style>
+</head>
+
+<body style="background-color: black;">
+    <!-- Add this right after body tag -->
+    <button class="logout-button" onclick="handleLogout()">
+        <i class="bi bi-box-arrow-right"></i>
+    </button>
+
+    <section id="Oval" class="mb-4">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="d-flex flex-column justify-content-center align-items-center" style="height: 100vh;">
+                    <!-- Canvas and Jarvis Hood -->
+                    <div style="position: relative; margin-bottom: 100px;">
+                        <canvas id="canvasOne" width="600" height="600"
+                            style="position: absolute; transform: translate(-50%, -50%);"></canvas>
+                        <div id="JarvisHood">
+                            <div class="square">
+                                <span class="circle"></span>
+                                <span class="circle"></span>
+                                <span class="circle"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Help text repositioned -->
+    <div class="text-white fs-4 text-center" style="position: fixed; bottom: 125px; width: 100%;">
+        How can I help you, <span id="userName"></span>?
+    </div>
+
+    <!-- Add this before the Particle js scripts -->
+    <script>
+        // Get and display user name when page loads
+        async function displayUserName() {
+            try {
+                const firstName = sessionStorage.getItem('firstName');
+                if (firstName) {
+                    document.getElementById('userName').textContent = firstName;
+                }
+            } catch (error) {
+                console.error('Failed to get user name:', error);
+            }
+        }
+
+        // Call when page loads
+        window.addEventListener('load', displayUserName);
+    </script>
+
+    <!-- Chat Interface -->
+    <div class="container-fluid" style="position: fixed; bottom: 25px; left: 0; right: 0; padding: 15px;">
+        <div class="row justify-content-center">
+            <div class="col-md-12 md-4 pt-3">
+                <div id="TextInput">
+                    <input type="text" id="message-input" class="input-field" placeholder="type here ..." />
+                    <div class="button-container">
+                        <button class="glow-on-hover" id="mic-button" onclick="window.location.href='siriwave.html'">
+                            <i class="bi bi-mic"></i>
+                        </button>
+                        <button class="glow-on-hover" id="send-button" style="display: none;" onclick="window.location.href='chat.html'">
+                            <i class="bi bi-send"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcrW6ZMFYlcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+        crossorigin="anonymous"></script>
+
+    <!-- Particle js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery.min.js"></script>
+    <script src="/eel.js"></script>
+    <script>
+        // Immediately start the animation when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize particle animation immediately
+            if (typeof initializeParticles === 'function') {
+                initializeParticles();
+            }
+            // Start other animations
+            startAnimations();
+
+            // --- Show/hide send button logic ---
+            const messageInput = document.getElementById('message-input');
+            const sendButton = document.getElementById('send-button');
+            
+            // Add input event listener for showing/hiding send button
+            messageInput.addEventListener('input', function() {
+                if (messageInput.value.trim().length > 0) {
+                    sendButton.style.display = 'inline-block';
+                } else {
+                    sendButton.style.display = 'none';
+                }
+            });
+
+            // Add keypress event listener for Enter key
+            messageInput.addEventListener('keypress', function(event) {
+                console.log('Enter key pressed');
+                if (event.key === 'Enter' && messageInput.value.trim().length > 0) {
+                    console.log('Valid input detected:', messageInput.value.trim());
+                    event.preventDefault();
+                    localStorage.setItem('userMessage', messageInput.value.trim());
+                    console.log('Message stored in localStorage:', localStorage.getItem('userMessage'));
+                    window.location.href = 'chat.html';
+                }
+            });
+
+            // Update the send button click handler
+            document.getElementById('send-button').addEventListener('click', function() {
+                console.log('Send button clicked');
+                if (messageInput.value.trim().length > 0) {
+                    console.log('Valid input detected:', messageInput.value.trim());
+                    localStorage.setItem('userMessage', messageInput.value.trim());
+                    console.log('Message stored in localStorage:', localStorage.getItem('userMessage'));
+                    window.location.href = 'chat.html';
+                }
+            });
+        });
+
+        function startAnimations() {
+            const canvas = document.getElementById('canvasOne');
+            if (canvas) {
+                canvas.style.transition = 'all 0.5s ease';
+                canvas.style.opacity = '1';
+            }
+        }
+    </script>
+    <script src="script.js"></script>
+    <script src="main.js"></script>
+    <script src="controller.js"></script>
+
+    <!-- Session check -->
+    <script>
+        window.addEventListener('load', async () => {
+            try {
+                const result = await eel.check_session()();
+                if (!result || !result.status) {
+                    window.location.href = 'login.html';
+                } else {
+                    // Check if this is a fresh login
+                    const isNewLogin = sessionStorage.getItem('freshLogin');
+                    if (isNewLogin === 'true') {
+                        // Play sound and remove the flag
+                        const audio = new Audio('assets/audio/sound.mp3');
+                        audio.play();
+                        sessionStorage.removeItem('freshLogin');
+                    }
+                }
+            } catch (error) {
+                console.error('Session check failed:', error);
+                window.location.href = 'login.html';
+            }
+        });
+    </script>
+
+    <!-- Logout Modal -->
+    <div id="logoutModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <h2>Log Out</h2>
+            <p>Are you sure that you would like to logout?</p>
+            <div class="modal-buttons">
+                <button class="modal-btn cancel-btn" onclick="closeLogoutModal()">Cancel</button>
+                <button class="modal-btn signout-btn" onclick="confirmLogout()">Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logout Scripts -->
+    <script>
+        function handleLogout() {
+            document.getElementById('logoutModal').style.display = 'flex';
+        }
+
+        function closeLogoutModal() {
+            document.getElementById('logoutModal').style.display = 'none';
+        }
+
+        function confirmLogout() {
+            sessionStorage.clear();
+            window.location.href = 'login.html';
+        }
+    </script>
+
+    <!-- Logout Styles -->
+    <style>
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: rgb(248, 248, 248);
+            padding: 20px;
+            border-radius: 14px;
+            text-align: center;
+            width: 270px;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        .modal-content h2 {
+            font-size: 17px;
+            margin: 0;
+            padding: 0;
+            color: #000;
+            font-weight: 600;
+        }
+
+        .modal-content p {
+            font-size: 13px;
+            color: #666;
+            margin: 12px 0;
+            padding: 0 10px;
+            line-height: 1.3;
+        }
+
+        .modal-buttons {
+            display: flex;
+            border-top: 1px solid #ddd;
+            margin-top: 15px;
+        }
+
+        .modal-btn {
+            flex: 1;
+            border: none;
+            background: none;
+            padding: 12px;
+            font-size: 17px;
+            cursor: pointer;
+            font-weight: 400;
+        }
+
+        .cancel-btn {
+            color: #007AFF;
+            border-right: 1px solid #ddd;
+        }
+
+        .signout-btn {
+            color: #FF3B30;
+            font-weight: 600;
+        }
+
+        .modal-btn:hover {
+            background-color: rgba(0, 0, 0, 0.04);
+        }
+    </style>
+    <style>
+        .logout-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: #343541;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .logout-button:hover {
+            background: #444654;
+            transform: scale(1.05);
+        }
+    </style>
+    <!-- Add after your existing scripts and before </body> -->
+    <script>
+        // Initialize speech recognition
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const recognition = new SpeechRecognition();
+        
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        recognition.lang = 'en-US';
+
+        recognition.onresult = (event) => {
+            const transcript = Array.from(event.results)
+                .map(result => result[0].transcript.toLowerCase())
+                .join('');
+
+            if (transcript.includes('hey friday')) {
+                window.location.href = 'siriwave.html';
+            }
+        };
+
+        recognition.onerror = (event) => {
+            console.error('Speech recognition error:', event.error);
+            // Restart recognition if it errors out
+            recognition.start();
+        };
+
+        recognition.onend = () => {
+            // Restart recognition when it ends
+            recognition.start();
+        };
+
+        // Start recognition when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            try {
+                recognition.start();
+                console.log('Voice recognition activated');
+            } catch (error) {
+                console.error('Error starting voice recognition:', error);
+            }
+        });
+
+        // After successful login verification
+        window.addEventListener('DOMContentLoaded', (event) => {
+            eel.playAssistantSound()();
+        });
+    </script>
+
+    <script>
+        // Add this function to handle sending messages
+        function sendMessage() {
+            const input = document.querySelector('.input-field');
+            const message = input.value.trim();
+            
+            if (message) {
+                // Store the message in localStorage
+                localStorage.setItem('pendingMessage', message);
+                
+                // Redirect to chat.html
+                window.location.href = 'chat.html';
+                
+                // Clear the input
+                input.value = '';
+            }
+        }
+
+        // Add event listeners for sending messages
+        document.querySelector('.input-field').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        document.querySelector('.glow-on-hover').addEventListener('click', function() {
+            sendMessage();
+        });
+
+        // New script for handling user input
+        const input = document.getElementById('message-input'); 
+        const sendButton = document.getElementById('send-button'); 
+ 
+        sendButton.addEventListener('click', () => { 
+            const query = input.value.trim(); 
+            if (!query) return; // do nothing if empty 
+ 
+            // Save query to localStorage so chat.html can read it 
+            localStorage.setItem('pendingQuery', query); 
+ 
+            // Redirect to chat.html 
+            window.location.href = 'chat.html'; 
+        }); 
+ 
+        // Support pressing Enter key to send 
+        input.addEventListener('keydown', (event) => { 
+            if (event.key === 'Enter') { 
+                sendButton.click(); 
+            } 
+        });
+    </script>
+</body>
+</html>
